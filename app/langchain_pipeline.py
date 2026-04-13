@@ -6,7 +6,7 @@ from app.prompts import get_prompt
 
 
 def get_llm():
-    return OllamaLLM(model="phi")
+    return OllamaLLM(model="llama3")
 
 
 def build_chain(mode="simple"):
@@ -14,7 +14,7 @@ def build_chain(mode="simple"):
     llm = get_llm()
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", get_prompt(mode)),
+        ("system", get_prompt(mode) + "\n\nContext:\n{context}"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}")
     ])
@@ -23,26 +23,23 @@ def build_chain(mode="simple"):
         query = inputs["input"]
         chat_history = inputs.get("chat_history", [])
 
-        # 🔎 Retrieve documents
         docs = retriever.invoke(query)
 
-        # 🧠 Combine context
         context = "\n\n".join([doc.page_content for doc in docs])
 
-        # 📝 Format prompt
-        formatted_prompt = prompt.format(
+        messages = prompt.format_messages(
             input=query,
-            chat_history=chat_history
+            chat_history=chat_history,
+            context=context
         )
 
-        final_input = f"{formatted_prompt}\n\nContext:\n{context}"
+        response = llm.invoke(messages)
 
-        # 🤖 Call LLM
-        answer = llm.invoke(final_input)
+        answer = response if isinstance(response, str) else response.content
 
         return {
             "answer": answer,
-            "context": docs
+            "source_documents": docs
         }
 
     return rag_pipeline
