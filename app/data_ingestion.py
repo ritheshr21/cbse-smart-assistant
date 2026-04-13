@@ -15,7 +15,7 @@ def download_pdf(url: str, filename: str) -> str:
         "User-Agent": "Mozilla/5.0"
     }
 
-    for attempt in range(3):  # retry logic
+    for attempt in range(3):
         try:
             response = requests.get(url, headers=headers, stream=True, timeout=10)
             response.raise_for_status()

@@ -4,7 +4,6 @@ from app.config import settings
 
 
 def get_embedding_model():
-    # 🔐 Set token globally
     if settings.HF_TOKEN:
         os.environ["HUGGINGFACEHUB_API_TOKEN"] = settings.HF_TOKEN
 

@@ -20,6 +20,5 @@ def save_vector_store(vector_store, path="faiss_index"):
     vector_store.save_local(path)
 
 
-# ✅ ADD THIS FUNCTION
 def load_vector_store(embedding_model, path="faiss_index"):
     return FAISS.load_local(path, embedding_model, allow_dangerous_deserialization=True)
