@@ -4,6 +4,7 @@ from app.langchain_pipeline import build_chain, get_llm
 from app.quiz_generator import generate_questions
 from app.evaluation import evaluate_answer
 from app.tracker import WeaknessTracker
+from app.mcq_parser import parse_mcqs
 
 app = FastAPI()
 tracker = WeaknessTracker()
@@ -27,6 +28,7 @@ def chat(request: QueryRequest):
 
 @app.post("/generate-quiz")
 def generate_quiz(request: QueryRequest):
+    global current_quiz
     response = qa_chain({
         "input": request.question
     })
@@ -34,16 +36,23 @@ def generate_quiz(request: QueryRequest):
     docs = response["source_documents"]
 
     context = "\n\n".join([doc.page_content for doc in docs[:2]])
-    print("CONTEXT LENGTH:", len(context))
-    print("CONTEXT SAMPLE:", context[:200])
-    quiz = generate_questions(llm, context)
+    quiz_text = generate_questions(llm, context)
+    current_quiz = parse_mcqs(quiz_text)
 
-    return {"quiz": quiz}
+    print("QUIZ RAW OUTPUT:\n", quiz_text)
+    return {
+        "quiz": quiz_text,
+        "mcqs": current_quiz  
+    }
 
 
 class EvalRequest(BaseModel):
     question: str
     answer: str
+
+
+class MCQAnswerRequest(BaseModel):
+    answers: dict   # {"1": "A", "2": "C"}
 
 
 @app.post("/evaluate")
@@ -71,4 +80,36 @@ def evaluate(req: EvalRequest):
     return {
         "evaluation": result,
         "weak_topics": tracker.get_weak_topics()
+    }
+
+
+
+@app.post("/submit-mcq")
+def submit_mcq(req: MCQAnswerRequest):
+    score = 0
+    total = len(current_quiz)
+
+    results = []
+
+    for mcq in current_quiz:
+        qid = str(mcq["question_id"])
+        correct = mcq["correct_answer"]
+
+        user_ans = req.answers.get(qid, "").upper()
+
+        is_correct = user_ans == correct
+
+        if is_correct:
+            score += 1
+
+        results.append({
+            "question_id": qid,
+            "correct_answer": correct,
+            "your_answer": user_ans,
+            "is_correct": is_correct
+        })
+
+    return {
+        "score": f"{score}/{total}",
+        "details": results
     }
