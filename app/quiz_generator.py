@@ -7,33 +7,37 @@ def generate_questions(llm, context, num_questions=3):
         template = """
 You are a CBSE examiner.
 
-Your task is to generate questions strictly from the given context.
+You MUST generate MCQ questions in EXACT format.
 
-Rules:
-- Do NOT ask for clarification
-- Do NOT say anything else
-- Do NOT return empty or dots
-- Always generate full questions
+DO NOT generate descriptive questions.
+DO NOT generate paragraphs.
+ONLY generate MCQs.
 
-Generate EXACTLY this format:
+Generate EXACTLY:
 
-Q1: <MCQ question>
+Q1: <question>
 Options:
-A) ...
-B) ...
-C) ...
-D) ...
-Answer: <correct option>
+A) <option>
+B) <option>
+C) <option>
+D) <option>
+Answer: <A/B/C/D>
 
-Q2: <MCQ question>
+Q2: <question>
 Options:
-A) ...
-B) ...
-C) ...
-D) ...
-Answer: <correct option>
+A) <option>
+B) <option>
+C) <option>
+D) <option>
+Answer: <A/B/C/D>
 
-Q3: <Subjective question>
+Q3: <question>
+Options:
+A) <option>
+B) <option>
+C) <option>
+D) <option>
+Answer: <A/B/C/D>
 
 Context:
 {context}
