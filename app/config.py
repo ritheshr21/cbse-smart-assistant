@@ -8,7 +8,9 @@ class Settings:
     RAW_DIR = os.path.join(DATA_DIR, "raw/")
     PROCESSED_DIR = os.path.join(DATA_DIR, "processed/")
     
-    EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+    # small variant (~130MB weights vs ~440MB for base) - keeps the deployed
+    # container's memory footprint under free/cheap PaaS tier RAM limits
+    EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
     CHUNK_SIZE = 400
     CHUNK_OVERLAP = 50
