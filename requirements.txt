@@ -11,3 +11,8 @@ pymupdf
 python-dotenv
 tqdm
 requests
+pytesseract
+Pillow
+langchain-ollama
+langchain-groq
+langchain-huggingface

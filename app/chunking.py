@@ -9,18 +9,36 @@ def split_into_paragraphs(text):
 def semantic_chunking(text):
     paragraphs = split_into_paragraphs(text)
 
+    chunk_size = settings.CHUNK_SIZE
+    overlap = settings.CHUNK_OVERLAP
+
     chunks = []
-    current = ""
+    current_words = []
+
+    def flush():
+        if current_words:
+            chunks.append(" ".join(current_words))
 
     for para in paragraphs:
-        if len(current.split()) + len(para.split()) <= settings.CHUNK_SIZE:
-            current += " " + para
-        else:
-            chunks.append(current.strip())
-            current = para
+        para_words = para.split()
 
-    if current:
-        chunks.append(current.strip())
+        if len(para_words) > chunk_size:
+            flush()
+            start = 0
+            while start < len(para_words):
+                end = start + chunk_size
+                chunks.append(" ".join(para_words[start:end]))
+                start = end - overlap if end - overlap > start else end
+            current_words = []
+            continue
+
+        if len(current_words) + len(para_words) <= chunk_size:
+            current_words.extend(para_words)
+        else:
+            flush()
+            current_words = (current_words[-overlap:] if overlap else []) + para_words
+
+    flush()
 
     return chunks
 

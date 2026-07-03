@@ -1,12 +1,17 @@
-from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from app.retriever import get_retriever
 from app.prompts import get_prompt
+from app.config import settings
 
 
 def get_llm():
-    return OllamaLLM(model="llama3")
+    if settings.GROQ_API_KEY:
+        from langchain_groq import ChatGroq
+        return ChatGroq(model=settings.GROQ_MODEL, api_key=settings.GROQ_API_KEY)
+
+    from langchain_ollama import OllamaLLM
+    return OllamaLLM(model=settings.OLLAMA_MODEL)
 
 
 def build_chain(mode="simple"):

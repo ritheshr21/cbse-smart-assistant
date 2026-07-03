@@ -4,24 +4,29 @@ import re
 def parse_mcqs(quiz_text):
     mcqs = []
 
-    questions = re.split(r"\n\d+\.\s", quiz_text)
+    blocks = re.split(r"\n(?=Q\d+\s*:)", quiz_text.strip())
 
-    for q in questions:
-        if "Answer:" not in q:
+    for block in blocks:
+        block = block.strip()
+
+        if "Answer:" not in block:
             continue
 
-        options = re.findall(r"[a-dA-D]\)\s*(.*)", q)
-        answer_match = re.search(r"Answer:\s*([a-dA-D])", q)
+        question_match = re.search(r"Q\d+\s*:\s*(.+)", block)
+        options = re.findall(r"([A-Da-d])\)\s*(.+)", block)
+        answer_match = re.search(r"Answer:\s*([A-Da-d])", block)
 
-        if not answer_match:
+        if not question_match or not options or not answer_match:
             continue
-
-        correct_answer = answer_match.group(1).upper()
 
         mcqs.append({
             "question_id": len(mcqs) + 1,
-            "options": options,
-            "correct_answer": correct_answer
+            "question": question_match.group(1).strip(),
+            "options": [
+                {"label": label.upper(), "text": text.strip()}
+                for label, text in options
+            ],
+            "correct_answer": answer_match.group(1).upper()
         })
 
     return mcqs
