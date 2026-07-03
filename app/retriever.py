@@ -8,7 +8,12 @@ def get_retriever():
     vector_store = load_vector_store(embedding_model)
 
     retriever = vector_store.as_retriever(
-        search_kwargs={"k": settings.TOP_K}
+        search_type="mmr",
+        search_kwargs={
+            "k": settings.TOP_K,
+            "fetch_k": settings.FETCH_K,
+            "lambda_mult": settings.MMR_LAMBDA
+        }
     )
 
     return retriever

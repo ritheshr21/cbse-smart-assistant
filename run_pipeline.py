@@ -3,8 +3,16 @@ from app.chunking import process_documents
 from app.embeddings import get_embedding_model
 from app.vector_store import create_documents, build_vector_store, save_vector_store
 
+# ncert.nic.in is currently unreachable, so per-chapter downloads (Maths)
+# are disabled for now. Class 10 Science is supplied locally as a single
+# combined PDF (all chapters) instead. "url" is just a filename here -
+# download_pdf() finds it already in data/raw/ and skips fetching.
 PDF_LINKS = [
-    "https://ncert.nic.in/textbook/pdf/leph101.pdf"
+    {
+        "url": "NCERT-Class-10-Science.pdf",
+        "subject": "science",
+        "class": "10",
+    },
 ]
 
 
@@ -17,7 +25,7 @@ def run():
     print("Chunks:", len(chunks))
 
     if len(chunks) == 0:
-        raise ValueError("❌ No chunks created. Check PDF download or extraction.")
+        raise ValueError("No chunks created. Check PDF download or extraction.")
 
     print("Step 3: Embeddings")
     embedding_model = get_embedding_model()
@@ -28,7 +36,7 @@ def run():
 
     save_vector_store(vector_store)
 
-    print("✅ DONE")
+    print("DONE")
 
 
 if __name__ == "__main__":
